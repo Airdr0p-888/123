@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>唤醒 TP 钱包打开网页</title>
+  <title>唤醒 TP 打开第三方页面</title>
 </head>
 <body>
 
 <button onclick="openTPWallet()" style="padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; cursor:pointer;">
-  在 TP 钱包中打开我的页面
+  唤醒 TP 钱包打开我的页面
 </button>
 
 <div id="qrcode" style="margin-top:20px; display:none; text-align:center;">
-  <p>如果唤醒失败，请用 TP 钱包扫码打开：</p>
+  <p>扫码兜底：用 TP 钱包打开</p>
   <img id="qrcode-img" src="" alt="二维码" style="width:200px; border:1px solid #ccc;">
 </div>
 
@@ -33,11 +33,17 @@ function showQRCode(url) {
 }
 
 function openTPWallet() {
-  const encodedUrl = encodeURIComponent(TARGET_URL);
-  const encodedCallback = encodeURIComponent(TARGET_URL); // 用目标 URL 作为回调
+  // 官方 JSON params
+  const params = {
+    url: TARGET_URL,
+    chain: "ETH",  // 可选，提升兼容
+    source: "web"  // 可选，来源标识
+  };
+  const encodedParams = encodeURIComponent(JSON.stringify(params));
+
   const schemes = [
-    `tp://openDapp?url=${encodedUrl}&callback=${encodedCallback}`,      // 主协议
-    `tpdapp://openDapp?url=${encodedUrl}&callback=${encodedCallback}`  // 备用协议
+    `tpdapp://open?params=${encodedParams}`,  // 主方案（官方推荐）
+    `tp://open?params=${encodedParams}`       // 备用（部分版本）
   ];
 
   // 如果已在 TP 浏览器，直接跳转
@@ -46,10 +52,10 @@ function openTPWallet() {
     return;
   }
 
-  // 1. 直接跳转主协议
+  // 1. 直接跳转主方案
   window.location.href = schemes[0];
 
-  // 2. 300ms 后用 iframe 增强（iOS 兼容）
+  // 2. 300ms 后 iframe 增强（iOS 兼容）
   setTimeout(() => {
     try {
       const iframe = document.createElement('iframe');
@@ -62,12 +68,12 @@ function openTPWallet() {
     }
   }, 300);
 
-  // 3. 2秒后尝试备用协议
+  // 3. 2秒后尝试备用
   setTimeout(() => {
     window.location.href = schemes[1];
   }, 2000);
 
-  // 4. 3.5秒后显示二维码（最终兜底）
+  // 4. 3.5秒后显示二维码（手动扫码打开）
   setTimeout(() => {
     showQRCode(TARGET_URL);
   }, 3500);
